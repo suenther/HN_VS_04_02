@@ -1,12 +1,16 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+import httpx
+
 app = FastAPI()
 
-@app.get("/", response_class=HTMLResponse)
+templates = Jinja2Templates(directory="app/views/templates")
+
+@app.get("/")
 async def read_products(request: Request):
     async with httpx.AsyncClient() as client:
-        response = await client.get("http://localhost:8082/products")
+        response = await client.get("http://localhost:9002/products")
         products = response.json()
-    return templates.TemplateResponse("products.html", {
-        "request": request,
-        "products": products
-    })
+        print(products)
+        return templates.TemplateResponse("products.html", {"request": request, "products": products})
